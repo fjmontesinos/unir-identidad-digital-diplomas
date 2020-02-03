@@ -174,7 +174,48 @@ export class DiplomasBlockchainService {
 
         }
     });
+  }
 
+  // Aprobar la alegación añadida por la universidad al Alumno (approve),
+  // ya que la Universidad la ha expedido pero el alumno debe aprobarla
+  async approbarClaimByAlumno( id: number ) {
+    // Usar la función instanciaAlumno.methods.approve()
+    // ejecutar el añadido de la claim en la identidad del alumno
+    // identidadAlumno.instancia.methods.approve(
+    //     1,
+    //     true
+    // ).send({
+    //     from: identidadAlumno.accountAddress,
+    //     gas: 300000
+    // }, (error: any, result: any) => {
+    //     if (!error) {
+    //         // console.log(result);
+    //         console.log('Claim aprobado por el alumno ' + result);
+    //     } else {
+    //         console.error(error);
+    //     }
+    // });
+  }
+
+  // Verificar la alegación por parte de la empresa (checkClaim)
+  // de que el alumno tiene ese claim y es válido y está aprobado
+  async verificarClaimAlumno(tipoClaim: number) {
+    // Usar la función  instanciaEmpresa.methods.checkClaim()
+    // identidadEmpresa.instancia.methods.checkClaim(
+    //     identidadUniversidad.smartContractAddress,
+    //     tipoClaim
+    // ).send({
+    //     from: identidadEmpresa.accountAddress,
+    //     gas: 300000
+    // }, (error: any, result: any) => {
+    //     if (!error) {
+    //       console.log('Claim ' + tipoClaim + ' verificado por la empresa para la identidad: ' + identidadAlumno.smartContractAddress);
+
+    //     } else {
+    //         console.error(error);
+
+    //     }
+    // });
   }
 
 
