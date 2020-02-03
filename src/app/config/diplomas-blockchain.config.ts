@@ -24,7 +24,7 @@ identidades.set('0x951d59346352577920dbb5dca241fc5c346fe950', {
     accountAddress: '0x951d59346352577920dbb5dca241fc5c346fe950',
     smartContractAddress: '0x64fAF8cAa1E5D5ded13AFab5cF2b986121269C5C',
     instancia: null,
-    keyClaim: {privateKey: "0x52f4d205ec73f3ebad7f1823be96f1f29c0fee9b176aab7eb5b489539b852f61", publicKey: "0xCB84E24Ac3287E52A079Fc146C530C042824Dcb3", key: "0x1da9e1d249bfddd1a17c76ff52581f7d55e9ae65e449a95da5be1447b7925fd5"}
+    accountClaim: '0xFc83780Dd8bc6eAE4DEe1f12F7976251D2753DfD'
 });
 
 identidades.set('0x7a55Fdcb796BA184fDA57530af3303b5553efC56', {

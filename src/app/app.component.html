@@ -393,8 +393,11 @@
                     </td>
                 </tr>
                 <tr>
-                    <td colspan="2">
-                        <input type="button" name="approval_unialumno" value="approval_unialumno" onclick="approveUniAlumno(1);"> response.events.ExecutionRequested.returnValues.executionId
+                    <td>
+                        Execution Id: <input class="form-control" type="text" size="10" #executionId value=""><br>
+                    </td>
+                    <td>
+                        <input type="button" name="approval_unialumno" value="Alumno - Aprobar Claim" (click)="aprobarClaimByAlumno();">
                     </td>
                 </tr>
                 <tr>

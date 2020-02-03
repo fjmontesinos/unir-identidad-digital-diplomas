@@ -19,6 +19,7 @@ export class AppComponent {
   @ViewChild('keyPurpose', {static: true}) keyPurpose: ElementRef;
   @ViewChild('keyType', {static: true}) keyType: ElementRef;
   @ViewChild('claim', {static: true}) claim: ElementRef;
+  @ViewChild('executionId', {static: true}) executionId: ElementRef;
 
   constructor(private diplomasBlockchainService: DiplomasBlockchainService,
               private titleServe: Title) {
@@ -69,9 +70,10 @@ export class AppComponent {
   }
 
   // response.events.ExecutionRequested.returnValues.executionId
-  async aprobarClaimByAlumno( executionId: number ) {
+  async aprobarClaimByAlumno( ) {
+    const executionId = this.executionId.nativeElement.value;
     // todo recuperar el id de la ejecución
-    // await this.blockChainService.approbarClaimByAlumno(executionId);
+    await this.diplomasBlockchainService.approbarClaimByAlumno(this.selectedAccount, executionId);
   }
 
   async verificarClaimAlumnoByEmpresa( claimType: number ) {

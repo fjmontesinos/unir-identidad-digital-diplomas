@@ -11,7 +11,6 @@ declare let window: any;
 })
 export class DiplomasBlockchainService {
 
-  private accountUniClaim = '0xFc83780Dd8bc6eAE4DEe1f12F7976251D2753DfD';
   private web3: any;
 
   constructor() {
@@ -101,7 +100,7 @@ export class DiplomasBlockchainService {
 
   // Añadir clave a la universidad para firmar alegaciones (addKey)
   async addKeyUniversidad( addressFrom: string, purpose: number, type: number ) {
-    const claimKey = this.web3.utils.keccak256(this.accountUniClaim);
+    const claimKey = this.web3.utils.keccak256(identidades.get(addressFrom).accountClaim);
 
     // Usar la función instanciaUni.methods.addKey() de tipo CLAIM
     identidades.get(addressFrom).instancia.methods.addKey(
@@ -114,7 +113,7 @@ export class DiplomasBlockchainService {
     }, (error: any, result: any) => {
         if (!error) {
             console.log('Clave con id: ' + claimKey +
-            ' para CLAIM añadida a la identidad de la uni para la dirección: ' + this.accountUniClaim);
+            ' para CLAIM añadida a la identidad de la uni para la dirección: ' + identidades.get(addressFrom).accountClaim);
         } else {
             console.error('Erro: ' + error);
         }
@@ -122,8 +121,6 @@ export class DiplomasBlockchainService {
   }
 
   async addClaimUniversidadToAlumno( addressFrom: string, alumnoAccount: string, alegacion: string ) {
-    console.log(identidades.get(addressFrom).keyClaim);
-
     const hexedData = this.web3.utils.asciiToHex(alegacion);
     console.log('hexedData: ' + hexedData);
 
@@ -133,7 +130,7 @@ export class DiplomasBlockchainService {
       hexedData);
     console.log('hashedData: ' + hashedDataToSign);
 
-    const signature = await this.web3.eth.sign(hashedDataToSign, this.accountUniClaim);
+    const signature = await this.web3.eth.sign(hashedDataToSign, identidades.get(addressFrom).accountClaim);
     console.log('signature: ' + signature);
 
     // Obtener Abi de instanciaAlumno.methods.addClaim()
@@ -153,7 +150,7 @@ export class DiplomasBlockchainService {
       if ( !error ) {
         console.log(result);
         const ejeccionId = result.returnValues.executionId;
-        alert(ejeccionId);
+        alert('Claim añadido con id de ejecución : ' + ejeccionId);
       }
     });
 
@@ -163,7 +160,7 @@ export class DiplomasBlockchainService {
         0,
         claimAbi
     ).send({
-        from: addressAlumno, // identidades.get(alumnoAccount).accountAddress,
+        from: addressFrom, // identidades.get(alumnoAccount).accountAddress,
         gas: 900000
     }, (error: any, result: any) => {
         if (!error) {
@@ -178,23 +175,23 @@ export class DiplomasBlockchainService {
 
   // Aprobar la alegación añadida por la universidad al Alumno (approve),
   // ya que la Universidad la ha expedido pero el alumno debe aprobarla
-  async approbarClaimByAlumno( id: number ) {
+  async approbarClaimByAlumno( addressFrom: string, executionId: number ) {
     // Usar la función instanciaAlumno.methods.approve()
     // ejecutar el añadido de la claim en la identidad del alumno
-    // identidadAlumno.instancia.methods.approve(
-    //     1,
-    //     true
-    // ).send({
-    //     from: identidadAlumno.accountAddress,
-    //     gas: 300000
-    // }, (error: any, result: any) => {
-    //     if (!error) {
-    //         // console.log(result);
-    //         console.log('Claim aprobado por el alumno ' + result);
-    //     } else {
-    //         console.error(error);
-    //     }
-    // });
+    identidades.get(addressFrom).instancia.methods.approve(
+        executionId,
+        true
+    ).send({
+        from: addressFrom,
+        gas: 400000
+    }, (error: any, result: any) => {
+        if (!error) {
+            // console.log(result);
+            console.log('Claim aprobado por el alumno ' + result);
+        } else {
+            console.error(error);
+        }
+    });
   }
 
   // Verificar la alegación por parte de la empresa (checkClaim)
