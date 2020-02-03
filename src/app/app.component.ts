@@ -22,6 +22,7 @@ export class AppComponent {
   @ViewChild('keyType', {static: true}) keyType: ElementRef;
   @ViewChild('claim', {static: true}) claim: ElementRef;
   @ViewChild('executionId', {static: true}) executionId: ElementRef;
+  @ViewChild('claimType', {static: true}) claimType: ElementRef;
 
   constructor(private diplomasBlockchainService: DiplomasBlockchainService,
               private titleServe: Title) {
@@ -92,8 +93,9 @@ export class AppComponent {
     await this.diplomasBlockchainService.approbarClaimByAlumno(this.selectedAccount, executionId);
   }
 
-  async verificarClaimAlumnoByEmpresa( claimType: number ) {
+  async verificarClaimAlumnoByEmpresa( ) {
+    const claimType = this.claimType.nativeElement.value;
     // verificar una claim de un alumno
-    // await this.blockChainService.verificarClaimAlumno(claimType);
+    await this.diplomasBlockchainService.verificarClaimAlumno(this.selectedAccount, addressAlumno, claimType);
   }
 }

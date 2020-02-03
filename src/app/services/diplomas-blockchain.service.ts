@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import Web3 from 'web3';
 import { claimHolderABI, claimHolderBytecode } from '../contracts/claimHolder';
 import { claimVerifierABI,claimVerifierBytecode } from '../contracts/claimVerifier';
-import { RCP_URL, identidades, IdentityTypes, CLAIM_TYPE_TITULO_ACADEMICO, KEY_TYPES, addressAlumno, RCP_URL_WS } from '../config/diplomas-blockchain.config';
+import { RCP_URL, identidades, IdentityTypes, CLAIM_TYPE_TITULO_ACADEMICO, KEY_TYPES, addressAlumno, RCP_URL_WS, addressEmpresa } from '../config/diplomas-blockchain.config';
 
 declare let window: any;
 
@@ -32,6 +32,34 @@ export class DiplomasBlockchainService {
         identidad.instancia = new this.web3.eth.Contract(claimVerifierABI, identidad.smartContractAddress);
       }
     }
+
+    // capturar evento para obtener el id de ejecución
+    // tslint:disable-next-line: prefer-const
+    identidades.get(addressAlumno).instancia.events.ExecutionRequested({}, ( error, result ) => {
+      if ( !error ) {
+        const ejeccionId = result.returnValues.executionId;
+        alert('Claim añadido con id de ejecución : ' + ejeccionId);
+      }
+    });
+
+    // capturar evento para obtener el id de ejecución
+    // tslint:disable-next-line: prefer-const
+    identidades.get(addressEmpresa).instancia.events.ClaimValid({}, ( error, result ) => {
+      if ( !error ) {
+        alert('Claim valido');
+      } else {
+        alert('Ha ocurrido un error al verificar el claim');
+      }
+    });
+
+    identidades.get(addressEmpresa).instancia.events.ClaimInvalid({}, ( error, result ) => {
+      if ( !error ) {
+        alert('Claim NO valido');
+      } else {
+        alert('Ha ocurrido un error al verificar el claim');
+      }
+    });
+
   }
 
   /**
@@ -83,21 +111,6 @@ export class DiplomasBlockchainService {
     }) as Promise<any>;
   }
 
-  // private generateKey() {
-  //   let privateKey = this.web3.utils.randomHex(32);
-  //   for (let i = privateKey.length; i < 66; i++) {
-  //       privateKey += '0';
-  //   }
-  //   const publicKey = this.web3.eth.accounts.privateKeyToAccount(privateKey).address;
-  //   const key = this.web3.utils.sha3(publicKey);
-
-  //   return {
-  //       privateKey,
-  //       publicKey,
-  //       key
-  //   };
-  // }
-
   // Añadir clave a la universidad para firmar alegaciones (addKey)
   async addKeyUniversidad( addressFrom: string, purpose: number, type: number ) {
     const claimKey = this.web3.utils.keccak256(identidades.get(addressFrom).accountClaim);
@@ -144,16 +157,6 @@ export class DiplomasBlockchainService {
     ).encodeABI();
     console.log('claimabi: ' + claimAbi);
 
-    // capturar evento para obtener el id de ejecución
-    // tslint:disable-next-line: prefer-const
-    identidades.get(alumnoAccount).instancia.events.ExecutionRequested({}, ( error, result ) => {
-      if ( !error ) {
-        console.log(result);
-        const ejeccionId = result.returnValues.executionId;
-        alert('Claim añadido con id de ejecución : ' + ejeccionId);
-      }
-    });
-
     // ejecutar el añadido de la claim en la identidad del alumno
     identidades.get(alumnoAccount).instancia.methods.execute(
         identidades.get(alumnoAccount).smartContractAddress,
@@ -196,23 +199,19 @@ export class DiplomasBlockchainService {
 
   // Verificar la alegación por parte de la empresa (checkClaim)
   // de que el alumno tiene ese claim y es válido y está aprobado
-  async verificarClaimAlumno(tipoClaim: number) {
-    // Usar la función  instanciaEmpresa.methods.checkClaim()
-    // identidadEmpresa.instancia.methods.checkClaim(
-    //     identidadUniversidad.smartContractAddress,
-    //     tipoClaim
-    // ).send({
-    //     from: identidadEmpresa.accountAddress,
-    //     gas: 300000
-    // }, (error: any, result: any) => {
-    //     if (!error) {
-    //       console.log('Claim ' + tipoClaim + ' verificado por la empresa para la identidad: ' + identidadAlumno.smartContractAddress);
-
-    //     } else {
-    //         console.error(error);
-
-    //     }
-    // });
+  async verificarClaimAlumno( addressFrom: string, alumnoAccount: string, tipoClaim: number) {
+    //  Usar la función  instanciaEmpresa.methods.checkClaim()
+    identidades.get(addressEmpresa).instancia.methods.checkClaim(
+        identidades.get(alumnoAccount).smartContractAddress,
+        tipoClaim
+    ).send({
+        from: addressFrom,
+        gas: 300000
+    }, (error: any, result: any) => {
+        if (error) {
+          console.error(error);
+        }
+    });
   }
 
 

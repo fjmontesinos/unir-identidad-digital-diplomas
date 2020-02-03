@@ -30,7 +30,7 @@ identidades.set('0x951d59346352577920dbb5dca241fc5c346fe950', {
     accountClaim: '0xFc83780Dd8bc6eAE4DEe1f12F7976251D2753DfD'
 });
 
-identidades.set('0x7a55Fdcb796BA184fDA57530af3303b5553efC56', {
+identidades.set('0x7a55fdcb796ba184fda57530af3303b5553efc56', {
     type: IdentityTypes.ClaimVerifier,
     rol: USER_ROLES.EMPRESA,
     accountAddress: '0x7a55fdcb796ba184fda57530af3303b5553efc56',

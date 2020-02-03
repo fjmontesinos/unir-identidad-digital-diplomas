@@ -400,10 +400,10 @@
                 </tr>
                 <tr>
                     <td>
-                        Tipo de Claim a verificar: <input type="text" name="tipoclaim" id="tipoclaim">
+                        Tipo de Claim a verificar: <select class="form-control" #claimType><option value="4">TITULO ACADEMICO</option><option value="5">PERMISO DE CONDUCIR</option></select>
                     </td>
                     <td>
-                        <input type="button" name="verifier_unialumno" value="verifier_unialumno" (click)="verificarClaimAlumnoByEmpresa()">
+                        <input type="button" name="verifier_unialumno" value="Verificar Claim de Alumno" (click)="verificarClaimAlumnoByEmpresa()">
                     </td>
                 </tr>
                 <tr>
