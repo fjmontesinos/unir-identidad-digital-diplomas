@@ -348,8 +348,6 @@
         <select (change)="onChange($event.target.value)">
           <option *ngFor="let i of accounts">{{i}}</option>
       </select>
-        <br />
-        <button (click)="limpiarConsola()">Limpiar la consola</button>
     </p>
 
     <div class="card-container">
@@ -381,15 +379,15 @@
                         <select class="form-control" #keyType><option value="1">ECDSA</option><option value="2">RSA</option></select>
                     </td>
                     <td>
-                        <input class="btn btn-success" type="button" name="addkey_Uni" value="Universidad - Add Claim Key" (click)="addKeyUniversidad()">
+                        <input class="btn btn-success" type="button" name="addkey_Uni" value="Universidad - Add Claim Key" (click)="addKeyUniversidad()" [disabled]="disableOpcionesUniversidad">
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        A&ntilde;ade claim: <input type="button" name="aniadirclaim" value="Universidad - A&ntilde;adir Claim a Alumno" (click)="addClaimUniversidadToAlumno()">
+                        Claim: <input class="form-control" type="text" size="70" #claim value="Certificado Experto Universitario en Desarrollo de Aplicaciones Blockchain"><br>
                     </td>
                     <td>
-                        Claim: <input class="form-control" type="text" size="75" #claim value="Posee certificado Experto Universitario en Desarrollo de Aplicaciones Blockchain"><br>
+                        <input type="button" name="aniadirclaim" value="Universidad - A&ntilde;adir Claim a Alumno" (click)="addClaimUniversidadToAlumno()" [disabled]="disableOpcionesUniversidad">
                     </td>
                 </tr>
                 <tr>
@@ -397,15 +395,23 @@
                         Execution Id: <input class="form-control" type="text" size="10" #executionId value=""><br>
                     </td>
                     <td>
-                        <input type="button" name="approval_unialumno" value="Alumno - Aprobar Claim" (click)="aprobarClaimByAlumno();">
+                        <input type="button" name="approval_unialumno" value="Alumno - Aprobar Claim" (click)="aprobarClaimByAlumno()" [disabled]="disableOpcionesAlumno">
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        <input type="button" name="verifier_unialumno" value="verifier_unialumno" onclick="verifierUniAlumno(identidad.tipoclaim.value)">
+                        Tipo de Claim a verificar: <input type="text" name="tipoclaim" id="tipoclaim">
                     </td>
                     <td>
-                        <input type="text" name="tipoclaim" id="tipoclaim">
+                        <input type="button" name="verifier_unialumno" value="verifier_unialumno" (click)="verificarClaimAlumnoByEmpresa()">
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Limpiar la consola
+                    </td>
+                    <td>
+                        <button (click)="limpiarConsola()">Limpiar la consola</button>
                     </td>
                 </tr>
             </table>

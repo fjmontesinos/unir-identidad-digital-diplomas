@@ -1,7 +1,7 @@
 import { Component, ViewChild, ElementRef } from '@angular/core';
 import { DiplomasBlockchainService } from './services/diplomas-blockchain.service';
 import { Title } from '@angular/platform-browser';
-import { addressAlumno, addressUniversidad } from './config/diplomas-blockchain.config';
+import { addressAlumno, addressUniversidad, USER_ROLES, identidades } from './config/diplomas-blockchain.config';
 
 @Component({
   selector: 'app-root',
@@ -11,8 +11,10 @@ import { addressAlumno, addressUniversidad } from './config/diplomas-blockchain.
 export class AppComponent {
   title = 'UNIR - Identidad Digital';
   accounts = '0x5c4756bb912dea209b94587d4d761ace5d321054;0x951d59346352577920dbb5dca241fc5c346fe950;0x7a55Fdcb796BA184fDA57530af3303b5553efC56'.split(';');
-  selectedAccount = '0x5c4756bb912dea209b94587d4d761ace5d321054';
+  selectedAccount = this.accounts[0];
   consola = '';
+  disableOpcionesAlumno = false;
+  disableOpcionesUniversidad = false;
 
   @ViewChild('keyPurposeAlumno', {static: true}) keyPurposeAlumnoInput: ElementRef;
   @ViewChild('keyPurposeUniversidad', {static: true}) keyPurposeUniversidadInput: ElementRef;
@@ -24,14 +26,28 @@ export class AppComponent {
   constructor(private diplomasBlockchainService: DiplomasBlockchainService,
               private titleServe: Title) {
                 this.titleServe.setTitle(this.title);
+                this.setSecurityByAccount();
               }
 
   onChange(newValue) {
-    console.log(newValue);
     this.selectedAccount = newValue;
+    this.setSecurityByAccount();
   }
 
-  limpiarConsola(){
+  setSecurityByAccount( ){
+    if ( identidades.get(this.selectedAccount).rol === USER_ROLES.ALUMNO ) {
+      this.disableOpcionesUniversidad = true;
+      this.disableOpcionesAlumno = false;
+    } else if ( identidades.get(this.selectedAccount).rol === USER_ROLES.UNIVERSIDAD ) {
+      this.disableOpcionesUniversidad = false;
+      this.disableOpcionesAlumno = true;
+    } else {
+      this.disableOpcionesUniversidad = true;
+      this.disableOpcionesAlumno = true;
+    }
+  }
+
+  limpiarConsola() {
     this.consola = '';
   }
 
