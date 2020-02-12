@@ -10,7 +10,7 @@ import { addressAlumno, addressUniversidad, USER_ROLES, identidades } from './co
 })
 export class AppComponent {
   title = 'UNIR - Identidad Digital';
-  accounts = '0x5c4756bb912dea209b94587d4d761ace5d321054;0x951d59346352577920dbb5dca241fc5c346fe950;0x7a55Fdcb796BA184fDA57530af3303b5553efC56'.split(';');
+  accounts = '0x5c4756bb912dea209b94587d4d761ace5d321054;0x951d59346352577920dbb5dca241fc5c346fe950;0x7a55fdcb796ba184fda57530af3303b5553efc56'.split(';');
   selectedAccount = this.accounts[0];
   consola = '';
   disableOpcionesAlumno = false;
