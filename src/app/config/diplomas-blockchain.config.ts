@@ -4,7 +4,7 @@ export enum KEY_TYPES {ECDSA = 1, RSA}
 export enum USER_ROLES {ALUMNO = 1, UNIVERSIDAD, EMPRESA}
 
 
-export const RCP_URL = 'http://localhost:8545';
+export const RCP_URL_HTTP = 'http://localhost:8545';
 export const RCP_URL_WS = 'ws://localhost:8545';
 export const CLAIM_TYPE_TITULO_ACADEMICO = 4;
 

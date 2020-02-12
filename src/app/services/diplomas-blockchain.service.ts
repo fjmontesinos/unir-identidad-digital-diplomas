@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import Web3 from 'web3';
 import { claimHolderABI, claimHolderBytecode } from '../contracts/claimHolder';
-import { claimVerifierABI,claimVerifierBytecode } from '../contracts/claimVerifier';
-import { RCP_URL, identidades, IdentityTypes, CLAIM_TYPE_TITULO_ACADEMICO, KEY_TYPES, addressAlumno, RCP_URL_WS, addressEmpresa } from '../config/diplomas-blockchain.config';
+import { claimVerifierABI, claimVerifierBytecode } from '../contracts/claimVerifier';
+import { identidades, IdentityTypes, CLAIM_TYPE_TITULO_ACADEMICO, KEY_TYPES, addressAlumno, RCP_URL_WS, addressEmpresa } from '../config/diplomas-blockchain.config';
 
 declare let window: any;
 
@@ -19,7 +19,7 @@ export class DiplomasBlockchainService {
 
   async init() {
     // inicializar web3
-    // window.web3 = new Web3(new Web3.providers.HttpProvider(RCP_URL));
+    // window.web3 = new Web3(new Web3.providers.HttpProvider(RCP_URL_HTTP));
     window.web3 = new Web3(new Web3.providers.WebsocketProvider(RCP_URL_WS));
 
     this.web3 = window.web3;
