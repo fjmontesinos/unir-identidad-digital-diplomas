@@ -344,97 +344,105 @@
     <!-- Resources -->
     <!-- Next Steps -->
     <h2>Identidad Digital</h2>
-    <p>Seleccione la dirección con la que interactuará:
-        <select (change)="onChange($event.target.value)">
-          <option *ngFor="let i of accounts">{{i}}</option>
-      </select>
-    </p>
-
-    <div class="card-container">
-        <form name="identidad">
-            <table cellpadding="5">
-                <tr>
-                    <td>
-                        Purpose:
-                        <select class="form-control" #keyPurposeAlumno><option value="1">Management</option><option value="2">Action</option><option value="3">Claim Signer</option><option value="4">Encryption</option></select>
-                    </td>
-                    <td>
-                        <input class="btn btn-success" type="button" name="getKeyByPurpose_Alumno" (click)="getKeyAlumnoByPurpose()" value="Alumno - Obtener Key by Purpose" />
-                        <br>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        Purpose:
-                        <select class="form-control" #keyPurposeUniversidad><option value="1">Management</option><option value="2">Action</option><option value="3">Claim Signer</option><option value="4">Encryption</option></select>
-                    </td>
-                    <td>
-                        <input class="btn btn-success" type="button" name="getKeyByPurpose_UNI" value="Universidad - Obtener Key by Purpose" (click)="getKeyUnivsersidadByPurpose()">
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        Purpose:
-                        <select class="form-control" #keyPurpose><option value="1">Management</option><option value="2">Action</option><option value="3" selected>Claim Signer</option><option value="4">Encryption</option></select> Type:
-                        <select class="form-control" #keyType><option value="1">ECDSA</option><option value="2">RSA</option></select>
-                    </td>
-                    <td>
-                        <input class="btn btn-success" type="button" name="addkey_Uni" value="Universidad - A&ntilde;adir Claim Key" (click)="addKeyUniversidad()" [disabled]="disableOpcionesUniversidad">
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        Claim: <input class="form-control" type="text" size="70" #claim value="Certificado Experto Universitario en Desarrollo de Aplicaciones Blockchain"><br>
-                    </td>
-                    <td>
-                        <input type="button" name="aniadirclaim" value="Universidad - A&ntilde;adir Claim a Alumno" (click)="addClaimUniversidadToAlumno()" [disabled]="disableOpcionesUniversidad">
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        Execution Id: <input class="form-control" type="text" size="10" #executionId value=""><br>
-                    </td>
-                    <td>
-                        <input type="button" name="approval_unialumno" value="Alumno - Aprobar Claim" (click)="aprobarClaimByAlumno()" [disabled]="disableOpcionesAlumno">
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        Tipo de Claim a verificar: <select class="form-control" #claimType><option value="4">TITULO ACADEMICO</option><option value="5">PERMISO DE CONDUCIR</option></select>
-                    </td>
-                    <td>
-                        <input type="button" name="verifier_unialumno" value="Verificar Claim de Alumno" (click)="verificarClaimAlumnoByEmpresa()">
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        Limpiar la consola
-                    </td>
-                    <td>
-                        <button (click)="limpiarConsola()">Limpiar la consola</button>
-                    </td>
-                </tr>
-            </table>
-        </form>
-
+    <div [hidden]="isIdentidadesDigitalesDesplegadas()">
+        <p>
+            Debe desplegar primero los contratos correspondientes a las identidades digitales
+        </p>
+        <p style="text-align:center;padding:20px"><input class="btn btn-success" type="button" name="deployIdentidad" value="Desplegar Identidades Digitales" (click)="deployIdentidadesDigitales()"></p>
     </div>
+    <div [hidden]="! isIdentidadesDigitalesDesplegadas()">
+        <p>Seleccione la dirección con la que interactuará:
+            <select (change)="onChange($event.target.value)">
+            <option *ngFor="let i of accounts">{{i}}</option>
+        </select>
+        </p>
 
-    <!-- Terminal -->
-    <div class="terminal">
-        <pre [innerHTML]="consola"></pre>
+        <div class="card-container">
+            <form name="identidad">
+                <table cellpadding="5">
+                    <tr>
+                        <td>
+                            Purpose:
+                            <select class="form-control" #keyPurposeAlumno><option value="1">Management</option><option value="2">Action</option><option value="3">Claim Signer</option><option value="4">Encryption</option></select>
+                        </td>
+                        <td>
+                            <input class="btn btn-success" type="button" name="getKeyByPurpose_Alumno" (click)="getKeyAlumnoByPurpose()" value="Alumno - Obtener Key by Purpose" />
+                            <br>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Purpose:
+                            <select class="form-control" #keyPurposeUniversidad><option value="1">Management</option><option value="2">Action</option><option value="3">Claim Signer</option><option value="4">Encryption</option></select>
+                        </td>
+                        <td>
+                            <input class="btn btn-success" type="button" name="getKeyByPurpose_UNI" value="Universidad - Obtener Key by Purpose" (click)="getKeyUnivsersidadByPurpose()">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Purpose:
+                            <select class="form-control" #keyPurpose><option value="1">Management</option><option value="2">Action</option><option value="3" selected>Claim Signer</option><option value="4">Encryption</option></select> Type:
+                            <select class="form-control" #keyType><option value="1">ECDSA</option><option value="2">RSA</option></select>
+                        </td>
+                        <td>
+                            <input class="btn btn-success" type="button" name="addkey_Uni" value="Universidad - A&ntilde;adir Claim Key" (click)="addKeyUniversidad()" [disabled]="disableOpcionesUniversidad">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Claim: <input class="form-control" type="text" size="70" #claim value="Certificado Experto Universitario en Desarrollo de Aplicaciones Blockchain"><br>
+                        </td>
+                        <td>
+                            <input type="button" name="aniadirclaim" value="Universidad - A&ntilde;adir Claim a Alumno" (click)="addClaimUniversidadToAlumno()" [disabled]="disableOpcionesUniversidad">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Execution Id: <input class="form-control" type="text" size="10" #executionId value=""><br>
+                        </td>
+                        <td>
+                            <input type="button" name="approval_unialumno" value="Alumno - Aprobar Claim" (click)="aprobarClaimByAlumno()" [disabled]="disableOpcionesAlumno">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Tipo de Claim a verificar: <select class="form-control" #claimType><option value="4">TITULO ACADEMICO</option><option value="5">PERMISO DE CONDUCIR</option></select>
+                        </td>
+                        <td>
+                            <input type="button" name="verifier_unialumno" value="Verificar Claim de Alumno" (click)="verificarClaimAlumnoByEmpresa()">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Limpiar la consola
+                        </td>
+                        <td>
+                            <button (click)="limpiarConsola()">Limpiar la consola</button>
+                        </td>
+                    </tr>
+                </table>
+            </form>
+
+        </div>
+
+        <!-- Terminal -->
+        <div class="terminal">
+            <pre [innerHTML]="consola"></pre>
+        </div>
     </div>
 
 
     <!-- Footer -->
     <footer>
-        Love Angular?&nbsp;
-        <a href="https://github.com/angular/angular" target="_blank" rel="noopener"> Give our repo a star.
+        UNIR Identidad Digital Diplomas (&copy; 2020 Javier Montesinos)&nbsp;
+        <a href="https://github.com/fjmontesinos/unir-identidad-digital-diplomas" target="_blank" rel="noopener"> Repositorio GitHub.
         <div class="github-star-badge">
             <svg class="material-icons" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
           Star
         </div>
       </a>
-        <a href="https://github.com/angular/angular" target="_blank" rel="noopener">
+        <a href="https://github.com/fjmontesinos/unir-identidad-digital-diplomas" target="_blank" rel="noopener">
             <svg class="material-icons" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" fill="#1976d2"/><path d="M0 0h24v24H0z" fill="none"/></svg>
         </a>
     </footer>
@@ -444,11 +452,3 @@
   </svg>
 
 </div>
-
-<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
-<!-- * * * * * * * * * * * The content above * * * * * * * * * * * -->
-<!-- * * * * * * * * * * is only a placeholder * * * * * * * * * * -->
-<!-- * * * * * * * * * * and can be replaced. * * * * * * * * * * * -->
-<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
-<!-- * * * * * * * * * * End of Placeholder * * * * * * * * * * * -->
-<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->

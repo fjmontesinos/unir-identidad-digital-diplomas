@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import Web3 from 'web3';
 import { claimHolderABI, claimHolderBytecode } from '../contracts/claimHolder';
 import { claimVerifierABI, claimVerifierBytecode } from '../contracts/claimVerifier';
-import { identidades, IdentityTypes, CLAIM_TYPE_TITULO_ACADEMICO, KEY_TYPES, addressAlumno, RCP_URL_WS, addressEmpresa } from '../config/diplomas-blockchain.config';
+import { identidades, IdentityTypes, CLAIM_TYPE_TITULO_ACADEMICO, KEY_TYPES, addressAlumno, RCP_URL_WS, addressEmpresa, addressUniversidad, IDENTITY_TYPE } from '../config/diplomas-blockchain.config';
 
 declare let window: any;
 
@@ -11,6 +11,7 @@ declare let window: any;
 })
 export class DiplomasBlockchainService {
 
+  private totalIdentidadesDesplegadas = 0;
   private web3: any;
 
   constructor() {
@@ -19,76 +20,116 @@ export class DiplomasBlockchainService {
 
   async init() {
     // inicializar web3
-    // window.web3 = new Web3(new Web3.providers.HttpProvider(RCP_URL_HTTP));
-    window.web3 = new Web3(new Web3.providers.WebsocketProvider(RCP_URL_WS));
+    // necesario para que se confirmen las transacciones 
+    // desde el segundo bloque en la versión 1.0.0-beta.55 de web3
+    const optionsProvider = {
+      transactionConfirmationBlocks: 1
+    };
 
+    window.web3 = new Web3(new Web3.providers.WebsocketProvider(RCP_URL_WS), null, optionsProvider);
     this.web3 = window.web3;
 
+    this.initIdentidadesDigitales();
+  }
+
+  async initIdentidadesDigitales() {
     // inicializar las instancias de los contratos
-    for ( let identidad of identidades.values() ) {
+    for ( const identidad of identidades.values() ) {
       if ( identidad.type === IdentityTypes.ClaimHolder ) {
         identidad.instancia = new this.web3.eth.Contract(claimHolderABI, identidad.smartContractAddress);
       } else if ( identidad.type === IdentityTypes.ClaimVerifier ) {
         identidad.instancia = new this.web3.eth.Contract(claimVerifierABI, identidad.smartContractAddress);
       }
+
+      // Verificar si la identidad está desplegada en la red blockchain
+      const code = await this.web3.eth.getCode(identidad.smartContractAddress);
+      // Si el code es distinto de 0x -> el contrato está desplegado
+      if ( code !== '0x' ) {
+        this.totalIdentidadesDesplegadas++;
+      }
     }
 
-    // capturar evento para obtener el id de ejecución
-    // tslint:disable-next-line: prefer-const
-    identidades.get(addressAlumno).instancia.events.ExecutionRequested({}, ( error, result ) => {
-      if ( !error ) {
-        const ejeccionId = result.returnValues.executionId;
-        alert('Claim añadido con id de ejecución : ' + ejeccionId);
-      }
-    });
+    // Si se han desplegado las 3 identidades -> añadimos los listeners a las diferentes instancias
+    if ( this.totalIdentidadesDesplegadas === 3 ) {
+      // capturar evento para obtener el id de ejecución
+      identidades.get(addressAlumno).instancia.events.ExecutionRequested({}, ( error, result ) => {
+        if ( !error ) {
+          const ejeccionId = result.returnValues.executionId;
+          alert('Claim añadido con id de ejecución : ' + ejeccionId);
+        }
+      });
 
-    // capturar evento para obtener el id de ejecución
-    // tslint:disable-next-line: prefer-const
-    identidades.get(addressEmpresa).instancia.events.ClaimValid({}, ( error, result ) => {
-      if ( !error ) {
-        alert('Claim valido');
-      } else {
-        alert('Ha ocurrido un error al verificar el claim');
-      }
-    });
+      // capturar evento para obtener claim valido
+      identidades.get(addressEmpresa).instancia.events.ClaimValid({}, ( error, result ) => {
+        if ( !error ) {
+          alert('Claim valido');
+        } else {
+          alert('Ha ocurrido un error al verificar el claim');
+        }
+      });
 
-    identidades.get(addressEmpresa).instancia.events.ClaimInvalid({}, ( error, result ) => {
-      if ( !error ) {
-        alert('Claim NO valido');
-      } else {
-        alert('Ha ocurrido un error al verificar el claim');
-      }
-    });
-
+      // capturar evento para obtener claim NO valido
+      identidades.get(addressEmpresa).instancia.events.ClaimInvalid({}, ( error, result ) => {
+        if ( !error ) {
+          alert('Claim NO valido');
+        } else {
+          alert('Ha ocurrido un error al verificar el claim');
+        }
+      });
+    }
   }
 
   /**
-   * Desplegar smart contract
+   * Desplegar smart contract de identidad
    * @param address dirección propietario del smart contract
+   * @param identidadType tipo de indentidad que se desea desplegar
    */
-  async deploySmartContract( address: string ) {
-    let c = new this.web3.eth.Contract(claimHolderABI);
-    let payload = { data: claimHolderBytecode };
+  async deployIdentidadDigital( address: string, identidadType: number ) {
+    let c: any;
+    let payload: any ;
+    if ( identidadType === IDENTITY_TYPE.CLAIM_HOLDER ) {
+      c = new this.web3.eth.Contract(claimHolderABI);
+      payload = { data: '0x' + claimHolderBytecode };
 
-    let parameters = {
+    } else if ( identidadType === IDENTITY_TYPE.CLAIM_VERIFIER ) {
+      c = new this.web3.eth.Contract(claimVerifierABI);
+      // En el caso de ser verifier debemos informar como argumento del constructor
+      // la dirección del smartcontract del issuer (Universidad)
+      payload = {
+        data: '0x' + claimVerifierBytecode,
+        arguments: [identidades.get(addressUniversidad).smartContractAddress]
+      };
+    }
+
+    // Estimación del gas a utilizar
+    const estimatedGas = await c.deploy(payload).estimateGas();
+    const parameters = {
       from: address,
-      gas: this.web3.utils.toHex(800000),
-      gasPrice: this.web3.utils.toHex(this.web3.utils.toWei('30', 'gwei'))
+      gas: estimatedGas + 1
     };
 
-    c.deploy(payload).send(parameters, (err, transactionHash) => {
-      console.log('Transaction hash: ', transactionHash);
-    }).on('confirmation', () => {}).then(
-      (newContracInstance) => {
-        // establecer la instancia
-        identidades.get(newContracInstance.options.address).instancia = newContracInstance;
-        console.log('Contrato Desplegado: ', newContracInstance.options.address);
-      }
-    );
-
+    // Desplegar el contrato en la red
+    c.deploy(payload)
+      .send(parameters)
+      .on('error', ( error ) => {
+        console.log(error);
+      })
+      .on('receipt', ( receipt ) => {
+        // console.log(receipt);
+      });
+  }
+  /**
+   * Verifica si se han desplegado las 3 identidades necesarias de la práctica
+   */
+  isIdentidadesDigitalesDesplegadas() {
+    if ( this.totalIdentidadesDesplegadas === 3 ) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
-  async getKeyByPurpose( addressFrom: string, address: string, purpose: number ): Promise<any> {
+  async getKeyByPurpose( addressFrom: string, address: string, purpose: number ): Promise<any> {    
     return new Promise((resolve, reject) => {
       identidades.get(address).instancia.methods.getKeysByPurpose(purpose).call({
         from: addressFrom,

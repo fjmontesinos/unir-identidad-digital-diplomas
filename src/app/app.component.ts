@@ -1,7 +1,7 @@
 import { Component, ViewChild, ElementRef } from '@angular/core';
 import { DiplomasBlockchainService } from './services/diplomas-blockchain.service';
 import { Title } from '@angular/platform-browser';
-import { addressAlumno, addressUniversidad, USER_ROLES, identidades } from './config/diplomas-blockchain.config';
+import { addressAlumno, addressUniversidad, addressEmpresa, identidades, USER_ROLES, IDENTITY_TYPE } from './config/diplomas-blockchain.config';
 
 @Component({
   selector: 'app-root',
@@ -98,4 +98,18 @@ export class AppComponent {
     // verificar una claim de un alumno
     await this.diplomasBlockchainService.verificarClaimAlumno(this.selectedAccount, addressAlumno, claimType);
   }
+
+  async deployIdentidadesDigitales() {
+    await this.diplomasBlockchainService.deployIdentidadDigital(addressAlumno, IDENTITY_TYPE.CLAIM_HOLDER);
+    await this.diplomasBlockchainService.deployIdentidadDigital(addressUniversidad, IDENTITY_TYPE.CLAIM_HOLDER);
+    await this.diplomasBlockchainService.deployIdentidadDigital(addressEmpresa, IDENTITY_TYPE.CLAIM_VERIFIER);
+    await this.diplomasBlockchainService.initIdentidadesDigitales();
+
+    alert('Identidades Digitales Desplegadas');
+  }
+
+  isIdentidadesDigitalesDesplegadas() {
+    return this.diplomasBlockchainService.isIdentidadesDigitalesDesplegadas();
+  }
+
 }
