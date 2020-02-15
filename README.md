@@ -2,6 +2,12 @@
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 8.3.21.
 
+## Remixd
+
+Levantar el servicio de remixd:
+
+remixd -s /home/javier/UNIR-Blockchain/04-Desarrollo/codigo_base/Contratos --remix-ide http://remix.ethereum.org
+
 ## Development server
 
 Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
