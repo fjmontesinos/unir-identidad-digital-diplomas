@@ -5,6 +5,7 @@ import { claimVerifierABI, claimVerifierBytecode } from '../contracts/claimVerif
 import { identidades, addressAlumno, addressUniversidad, addressEmpresa } from '../config/diplomas-blockchain.config';
 import { KEY_TYPES, RCP_URL_WS, CLAIM_TYPES } from '../config/diplomas-blockchain.config';
 import { IDENTITY_TYPE } from '../model/identidad-unir';
+import { Subject, Observable } from 'rxjs';
 
 declare let window: any;
 
@@ -13,11 +14,17 @@ declare let window: any;
 })
 export class DiplomasBlockchainService {
 
+  public consola$ = new Subject<string>();
+
   private totalIdentidadesDesplegadas = 0;
   private web3: any;
 
   constructor() {
     this.init();
+  }
+
+  getConsola$(): Observable<string> {
+    return this.consola$.asObservable();
   }
 
   async init() {
@@ -56,26 +63,28 @@ export class DiplomasBlockchainService {
       // capturar evento para obtener el id de ejecución
       identidades.get(addressAlumno).instancia.events.ExecutionRequested({}, ( error, result ) => {
         if ( !error ) {
-          const ejeccionId = result.returnValues.executionId;
-          alert('Claim añadido con id de ejecución : ' + ejeccionId);
+          const mensaje = 'CLAIM añadido con id de ejecución: ' + result.returnValues.executionId;
+          this.consola$.next(mensaje);
+        } else {
+          this.consola$.next('Error: ' + error);
         }
       });
 
       // capturar evento para obtener claim valido
       identidades.get(addressEmpresa).instancia.events.ClaimValid({}, ( error, result ) => {
         if ( !error ) {
-          alert('Claim valido');
+          this.consola$.next('CLAIM válido');
         } else {
-          alert('Ha ocurrido un error al verificar el claim');
+          this.consola$.next('Error: ' + error);
         }
       });
 
       // capturar evento para obtener claim NO valido
       identidades.get(addressEmpresa).instancia.events.ClaimInvalid({}, ( error, result ) => {
         if ( !error ) {
-          alert('Claim NO valido');
+          this.consola$.next('CLAIM NO válido');
         } else {
-          alert('Ha ocurrido un error al verificar el claim');
+          this.consola$.next('Error: ' + error);
         }
       });
     }
@@ -137,7 +146,7 @@ export class DiplomasBlockchainService {
         from: addressFrom
       }
     );
-    
+
     return new Promise((resolve, reject) => {
       identidades.get(address).instancia.methods.getKeysByPurpose(purpose).call({
         from: addressFrom,
@@ -146,14 +155,14 @@ export class DiplomasBlockchainService {
           if (!error) {
               // console.log(result);
               if (result.length > 0) {
-                  console.log('Clave de tipo ' + purpose + ' de ' + address + ' : '  + result);
+                  this.consola$.next('Clave de tipo ' + purpose + ' de ' + address + ':\n'  + result);
                   resolve(result);
               } else {
-                  console.log('La identidad asocida a ' + address + ' no tiene clave de tipo: ' + purpose);
+                  this.consola$.next('La identidad de ' + address + ' no tiene clave de tipo: ' + purpose);
                   resolve(undefined);
               }
           } else {
-              console.error('Error: ' + error);
+              this.consola$.next('Error: ' + error);
               reject(error);
           }
       });
@@ -176,6 +185,8 @@ export class DiplomasBlockchainService {
       type
     ).estimateGas({from: addressFrom});
 
+    this.consola$.next('Gas estimado para añadir la key: ' + estimatedGas);
+
     // Usar la función instanciaUni.methods.addKey() de tipo CLAIM
     identidades.get(addressFrom).instancia.methods.addKey(
       claimKey,
@@ -186,26 +197,27 @@ export class DiplomasBlockchainService {
         gas: estimatedGas + 1
     }, (error: any, result: any) => {
         if (!error) {
-            console.log('Clave con id: ' + claimKey +
-            ' para CLAIM añadida a la identidad de la uni para la dirección: ' + identidades.get(addressFrom).accountClaim);
+          this.consola$.next('Añadida clave de tipo ' + purpose + ' para la dirección: ' +
+            identidades.get(addressFrom).accountClaim + ':\n'
+            + 'Key: ' + claimKey);
         } else {
-            console.error('Error: ' + error);
+          this.consola$.next('Error: ' + error);
         }
     });
   }
 
   async addClaimUniversidadToAlumno( addressFrom: string, alumnoAccount: string, alegacion: string ) {
     const hexedData = this.web3.utils.asciiToHex(alegacion);
-    console.log('hexedData: ' + hexedData);
+    // console.log('hexedData: ' + hexedData);
 
     const hashedDataToSign = this.web3.utils.soliditySha3(
       identidades.get(alumnoAccount).smartContractAddress,
       CLAIM_TYPES.TITULO_ACADEMICO,
       hexedData);
-    console.log('hashedData: ' + hashedDataToSign);
+    // console.log('hashedData: ' + hashedDataToSign);
 
     const signature = await this.web3.eth.sign(hashedDataToSign, identidades.get(addressFrom).accountClaim);
-    console.log('signature: ' + signature);
+    // console.log('signature: ' + signature);
 
     // Obtener Abi de instanciaAlumno.methods.addClaim()
     const claimAbi = await identidades.get(alumnoAccount).instancia.methods.addClaim(
@@ -216,7 +228,7 @@ export class DiplomasBlockchainService {
         hexedData,
         "http://montesinos.org.es"
     ).encodeABI();
-    console.log('claimabi: ' + claimAbi);
+    // console.log('claimabi: ' + claimAbi);
 
     // Estimación del gas a utilizar
     const estimatedGas = await identidades.get(alumnoAccount).instancia.methods.execute(
@@ -225,7 +237,7 @@ export class DiplomasBlockchainService {
       claimAbi
     ).estimateGas({from: addressFrom});
 
-    console.log(estimatedGas);
+    this.consola$.next('Gas estimado para añadir el CLAIM: ' + estimatedGas);
 
     // ejecutar el añadido de la claim en la identidad del alumno
     identidades.get(alumnoAccount).instancia.methods.execute(
@@ -237,10 +249,10 @@ export class DiplomasBlockchainService {
         gas: estimatedGas + 1
     }, (error: any, result: any) => {
         if (!error) {
-          console.log('Claim añadido a la identidad del alumno');
+          this.consola$.next('CLAIM añadido a la identidad del alumno correctamente');
 
         } else {
-          console.error(error);
+          this.consola$.next('Error: ' + error);
 
         }
     });
@@ -255,6 +267,8 @@ export class DiplomasBlockchainService {
       true
     ).estimateGas({from: addressFrom});
 
+    this.consola$.next('Gas estimado para aprobar el CLAIM: ' + estimatedGas);
+
     // Usar la función instanciaAlumno.methods.approve()
     // ejecutar el añadido de la claim en la identidad del alumno
     identidades.get(addressFrom).instancia.methods.approve(
@@ -266,9 +280,9 @@ export class DiplomasBlockchainService {
     }, (error: any, result: any) => {
         if (!error) {
             // console.log(result);
-            console.log('Claim aprobado por el alumno ' + result);
+            this.consola$.next('CLAIM aprobado por el alumno');
         } else {
-            console.error(error);
+          this.consola$.next('Error: ' + error);
         }
     });
   }
@@ -282,6 +296,8 @@ export class DiplomasBlockchainService {
         tipoClaim
     ).estimateGas({from: addressFrom});
 
+    this.consola$.next('Gas estimado para verificar el CLAIM: ' + estimatedGas);
+
     //  Usar la función  instanciaEmpresa.methods.checkClaim()
     identidades.get(addressEmpresa).instancia.methods.checkClaim(
         identidades.get(alumnoAccount).smartContractAddress,
@@ -291,7 +307,7 @@ export class DiplomasBlockchainService {
         gas: estimatedGas +  1
     }, (error: any, result: any) => {
         if (error) {
-          console.error(error);
+          this.consola$.next('Error: ' + error);
         }
     });
   }

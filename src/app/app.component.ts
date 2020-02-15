@@ -1,15 +1,17 @@
-import { Component, ViewChild, ElementRef } from '@angular/core';
+import { Component, ViewChild, ElementRef, OnDestroy, NgZone } from '@angular/core';
 import { DiplomasBlockchainService } from './services/diplomas-blockchain.service';
 import { Title } from '@angular/platform-browser';
 import { addressAlumno, addressUniversidad, addressEmpresa, identidades } from './config/diplomas-blockchain.config';
 import { IDENTITY_TYPE, IDENTITY_ROLES } from './model/identidad-unir';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent {
+export class AppComponent implements OnDestroy {
+  consola$: Subscription;
   title = 'UNIR - Identidad Digital';
   accounts = [addressAlumno, addressUniversidad, addressEmpresa];
   selectedAccount = this.accounts[0];
@@ -26,9 +28,17 @@ export class AppComponent {
   @ViewChild('claimType', {static: true}) claimType: ElementRef;
 
   constructor(private diplomasBlockchainService: DiplomasBlockchainService,
+              private ngZone: NgZone,
               private titleServe: Title) {
                 this.titleServe.setTitle(this.title);
                 this.setSecurityByAccount();
+                this.consola$ = this.diplomasBlockchainService.getConsola$().subscribe( (_mensaje) => {
+                  this.ngZone.run( () => {
+                    this.consola +=  '<pre>' + _mensaje + '</pre>';
+                    document.getElementById('consola').scrollTop +=
+                      document.getElementById('consola').scrollHeight;
+                  });
+                });
               }
 
   onChange(newValue) {
@@ -36,7 +46,11 @@ export class AppComponent {
     this.setSecurityByAccount();
   }
 
-  setSecurityByAccount( ){
+  async ngOnDestroy() {
+    this.consola$.unsubscribe();
+  }
+
+  setSecurityByAccount( ) {
     if ( identidades.get(this.selectedAccount).rol === IDENTITY_ROLES.ALUMNO ) {
       this.disableOpcionesUniversidad = true;
       this.disableOpcionesAlumno = false;
@@ -55,24 +69,12 @@ export class AppComponent {
 
   async getKeyAlumnoByPurpose() {
     const purpose = this.keyPurposeAlumnoInput.nativeElement.value;
-
-    const key = await this.diplomasBlockchainService.getKeyByPurpose(this.selectedAccount, addressAlumno, purpose);
-    if ( key !== undefined ) {
-       this.consola += '<pre>Clave de tipo ' + purpose + ' del alumno ' + addressAlumno + ':\n' + key + '</pre>';
-    } else {
-       this.consola += '<pre>El alumno ' + addressAlumno + ' no tiene clave de tipo ' + purpose + '</pre>';
-    }
+    await this.diplomasBlockchainService.getKeyByPurpose(this.selectedAccount, addressAlumno, purpose);
   }
 
   async getKeyUnivsersidadByPurpose() {
     const purpose = this.keyPurposeUniversidadInput.nativeElement.value;
-
-    const key = await this.diplomasBlockchainService.getKeyByPurpose(this.selectedAccount, addressUniversidad, purpose);
-    if ( key !== undefined ) {
-      this.consola += '<pre>Clave de tipo ' + purpose + ' de la universidad ' + addressUniversidad + ':\n' + key + '</pre>';
-    } else {
-      this.consola += '<pre>La universidad ' + addressUniversidad + ' no tiene clave de tipo ' + purpose + '</pre>';
-    }
+    await this.diplomasBlockchainService.getKeyByPurpose(this.selectedAccount, addressUniversidad, purpose);
   }
 
   async addKeyUniversidad() {
@@ -106,7 +108,7 @@ export class AppComponent {
     await this.diplomasBlockchainService.deployIdentidadDigital(addressEmpresa, IDENTITY_TYPE.CLAIM_VERIFIER);
     await this.diplomasBlockchainService.initIdentidadesDigitales();
 
-    alert('Identidades Digitales Desplegadas');
+    this.consola +=  'Identidades Digitales Desplegadas';
   }
 
   isIdentidadesDigitalesDesplegadas() {
