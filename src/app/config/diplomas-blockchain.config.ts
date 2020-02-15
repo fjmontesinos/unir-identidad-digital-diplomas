@@ -2,6 +2,7 @@ export enum IdentityTypes {ClaimHolder, ClaimVerifier}
 export enum PURPOSE_TYPES {MANAGEMENT = 1, ACTION, CLAIM, ENCRYPTION}
 export enum KEY_TYPES {ECDSA = 1, RSA}
 export enum USER_ROLES {ALUMNO = 1, UNIVERSIDAD, EMPRESA}
+export enum IDENTITY_TYPE {CLAIM_HOLDER = 1, CLAIM_VERIFIER}
 
 
 export const RCP_URL_HTTP = 'http://localhost:8545';
