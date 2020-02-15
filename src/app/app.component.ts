@@ -1,7 +1,8 @@
 import { Component, ViewChild, ElementRef } from '@angular/core';
 import { DiplomasBlockchainService } from './services/diplomas-blockchain.service';
 import { Title } from '@angular/platform-browser';
-import { addressAlumno, addressUniversidad, addressEmpresa, identidades, USER_ROLES, IDENTITY_TYPE } from './config/diplomas-blockchain.config';
+import { addressAlumno, addressUniversidad, addressEmpresa, identidades } from './config/diplomas-blockchain.config';
+import { IDENTITY_TYPE, IDENTITY_ROLES } from './model/identidad-unir';
 
 @Component({
   selector: 'app-root',
@@ -10,7 +11,7 @@ import { addressAlumno, addressUniversidad, addressEmpresa, identidades, USER_RO
 })
 export class AppComponent {
   title = 'UNIR - Identidad Digital';
-  accounts = '0x5c4756bb912dea209b94587d4d761ace5d321054;0x951d59346352577920dbb5dca241fc5c346fe950;0x7a55fdcb796ba184fda57530af3303b5553efc56'.split(';');
+  accounts = [addressAlumno, addressUniversidad, addressEmpresa];
   selectedAccount = this.accounts[0];
   consola = '';
   disableOpcionesAlumno = false;
@@ -36,10 +37,10 @@ export class AppComponent {
   }
 
   setSecurityByAccount( ){
-    if ( identidades.get(this.selectedAccount).rol === USER_ROLES.ALUMNO ) {
+    if ( identidades.get(this.selectedAccount).rol === IDENTITY_ROLES.ALUMNO ) {
       this.disableOpcionesUniversidad = true;
       this.disableOpcionesAlumno = false;
-    } else if ( identidades.get(this.selectedAccount).rol === USER_ROLES.UNIVERSIDAD ) {
+    } else if ( identidades.get(this.selectedAccount).rol === IDENTITY_ROLES.UNIVERSIDAD ) {
       this.disableOpcionesUniversidad = false;
       this.disableOpcionesAlumno = true;
     } else {

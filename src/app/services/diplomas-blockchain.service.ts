@@ -2,7 +2,9 @@ import { Injectable } from '@angular/core';
 import Web3 from 'web3';
 import { claimHolderABI, claimHolderBytecode } from '../contracts/claimHolder';
 import { claimVerifierABI, claimVerifierBytecode } from '../contracts/claimVerifier';
-import { identidades, IdentityTypes, CLAIM_TYPE_TITULO_ACADEMICO, KEY_TYPES, addressAlumno, RCP_URL_WS, addressEmpresa, addressUniversidad, IDENTITY_TYPE } from '../config/diplomas-blockchain.config';
+import { identidades, addressAlumno, addressUniversidad, addressEmpresa } from '../config/diplomas-blockchain.config';
+import { KEY_TYPES, RCP_URL_WS, CLAIM_TYPES } from '../config/diplomas-blockchain.config';
+import { IDENTITY_TYPE } from '../model/identidad-unir';
 
 declare let window: any;
 
@@ -34,10 +36,10 @@ export class DiplomasBlockchainService {
 
   async initIdentidadesDigitales() {
     // inicializar las instancias de los contratos
-    for ( const identidad of identidades.values() ) {
-      if ( identidad.type === IdentityTypes.ClaimHolder ) {
+    for ( let identidad of identidades.values() ) {
+      if ( identidad.type === IDENTITY_TYPE.CLAIM_HOLDER ) {
         identidad.instancia = new this.web3.eth.Contract(claimHolderABI, identidad.smartContractAddress);
-      } else if ( identidad.type === IdentityTypes.ClaimVerifier ) {
+      } else if ( identidad.type === IDENTITY_TYPE.CLAIM_VERIFIER ) {
         identidad.instancia = new this.web3.eth.Contract(claimVerifierABI, identidad.smartContractAddress);
       }
 
@@ -115,7 +117,7 @@ export class DiplomasBlockchainService {
         console.log(error);
       })
       .on('receipt', ( receipt ) => {
-        // console.log(receipt);
+        console.log(receipt);
       });
   }
   /**
@@ -135,7 +137,7 @@ export class DiplomasBlockchainService {
         from: addressFrom
       }
     );
-
+    
     return new Promise((resolve, reject) => {
       identidades.get(address).instancia.methods.getKeysByPurpose(purpose).call({
         from: addressFrom,
@@ -198,7 +200,7 @@ export class DiplomasBlockchainService {
 
     const hashedDataToSign = this.web3.utils.soliditySha3(
       identidades.get(alumnoAccount).smartContractAddress,
-      CLAIM_TYPE_TITULO_ACADEMICO,
+      CLAIM_TYPES.TITULO_ACADEMICO,
       hexedData);
     console.log('hashedData: ' + hashedDataToSign);
 
@@ -207,7 +209,7 @@ export class DiplomasBlockchainService {
 
     // Obtener Abi de instanciaAlumno.methods.addClaim()
     const claimAbi = await identidades.get(alumnoAccount).instancia.methods.addClaim(
-        CLAIM_TYPE_TITULO_ACADEMICO, // Certificado de universidad
+        CLAIM_TYPES.TITULO_ACADEMICO, // Certificado de universidad
         KEY_TYPES.ECDSA, // ECDSA
         identidades.get(addressFrom).smartContractAddress,
         signature,
