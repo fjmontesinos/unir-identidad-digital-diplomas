@@ -102,7 +102,7 @@ export class DiplomasBlockchainService {
     }
 
     // Estimación del gas a utilizar
-    const estimatedGas = await c.deploy(payload).estimateGas();
+    const estimatedGas = await c.deploy(payload).estimateGas({from: address});
     const parameters = {
       from: address,
       gas: estimatedGas + 1
@@ -129,11 +129,17 @@ export class DiplomasBlockchainService {
     }
   }
 
-  async getKeyByPurpose( addressFrom: string, address: string, purpose: number ): Promise<any> {    
+  async getKeyByPurpose( addressFrom: string, address: string, purpose: number ): Promise<any> {
+    // Estimación del gas a utilizar
+    const estimatedGas = await identidades.get(address).instancia.methods.getKeysByPurpose(purpose).estimateGas({
+        from: addressFrom
+      }
+    );
+
     return new Promise((resolve, reject) => {
       identidades.get(address).instancia.methods.getKeysByPurpose(purpose).call({
         from: addressFrom,
-        gas: 30000
+        gas: estimatedGas + 1
       }, (error: any, result: any) => {
           if (!error) {
               // console.log(result);
@@ -152,9 +158,21 @@ export class DiplomasBlockchainService {
     }) as Promise<any>;
   }
 
-  // Añadir clave a la universidad para firmar alegaciones (addKey)
+  /**
+   * Añadir clave a la universidad para firmar alegaciones (addKey)
+   * @param addressFrom 
+   * @param purpose 
+   * @param type 
+   */
   async addKeyUniversidad( addressFrom: string, purpose: number, type: number ) {
     const claimKey = this.web3.utils.keccak256(identidades.get(addressFrom).accountClaim);
+
+    // Estimación del gas a utilizar
+    const estimatedGas = await identidades.get(addressFrom).instancia.methods.addKey(
+      claimKey,
+      purpose,
+      type
+    ).estimateGas({from: addressFrom});
 
     // Usar la función instanciaUni.methods.addKey() de tipo CLAIM
     identidades.get(addressFrom).instancia.methods.addKey(
@@ -163,13 +181,13 @@ export class DiplomasBlockchainService {
       type
     ).send({
         from: addressFrom,
-        gas: 600000
+        gas: estimatedGas + 1
     }, (error: any, result: any) => {
         if (!error) {
             console.log('Clave con id: ' + claimKey +
             ' para CLAIM añadida a la identidad de la uni para la dirección: ' + identidades.get(addressFrom).accountClaim);
         } else {
-            console.error('Erro: ' + error);
+            console.error('Error: ' + error);
         }
     });
   }
@@ -198,6 +216,15 @@ export class DiplomasBlockchainService {
     ).encodeABI();
     console.log('claimabi: ' + claimAbi);
 
+    // Estimación del gas a utilizar
+    const estimatedGas = await identidades.get(alumnoAccount).instancia.methods.execute(
+      identidades.get(alumnoAccount).smartContractAddress,
+      0,
+      claimAbi
+    ).estimateGas({from: addressFrom});
+
+    console.log(estimatedGas);
+
     // ejecutar el añadido de la claim en la identidad del alumno
     identidades.get(alumnoAccount).instancia.methods.execute(
         identidades.get(alumnoAccount).smartContractAddress,
@@ -205,7 +232,7 @@ export class DiplomasBlockchainService {
         claimAbi
     ).send({
         from: addressFrom, // identidades.get(alumnoAccount).accountAddress,
-        gas: 900000
+        gas: estimatedGas + 1
     }, (error: any, result: any) => {
         if (!error) {
           console.log('Claim añadido a la identidad del alumno');
@@ -220,6 +247,12 @@ export class DiplomasBlockchainService {
   // Aprobar la alegación añadida por la universidad al Alumno (approve),
   // ya que la Universidad la ha expedido pero el alumno debe aprobarla
   async approbarClaimByAlumno( addressFrom: string, executionId: number ) {
+    // Estimar el gas necesario
+    const estimatedGas = await identidades.get(addressFrom).instancia.methods.approve(
+      executionId,
+      true
+    ).estimateGas({from: addressFrom});
+
     // Usar la función instanciaAlumno.methods.approve()
     // ejecutar el añadido de la claim en la identidad del alumno
     identidades.get(addressFrom).instancia.methods.approve(
@@ -227,7 +260,7 @@ export class DiplomasBlockchainService {
         true
     ).send({
         from: addressFrom,
-        gas: 400000
+        gas: estimatedGas + 1
     }, (error: any, result: any) => {
         if (!error) {
             // console.log(result);
@@ -239,15 +272,21 @@ export class DiplomasBlockchainService {
   }
 
   // Verificar la alegación por parte de la empresa (checkClaim)
-  // de que el alumno tiene ese claim y es válido y está aprobado
-  async verificarClaimAlumno( addressFrom: string, alumnoAccount: string, tipoClaim: number) {
+  // de que una identidad tiene el claim solicitado es válido y está aprobado
+  async verificarClaimIdentidadByEmpresa( addressFrom: string, alumnoAccount: string, tipoClaim: number) {
+    // Estimar el gas necesario
+    const estimatedGas = await identidades.get(addressEmpresa).instancia.methods.checkClaim(
+        identidades.get(alumnoAccount).smartContractAddress,
+        tipoClaim
+    ).estimateGas({from: addressFrom});
+
     //  Usar la función  instanciaEmpresa.methods.checkClaim()
     identidades.get(addressEmpresa).instancia.methods.checkClaim(
         identidades.get(alumnoAccount).smartContractAddress,
         tipoClaim
     ).send({
         from: addressFrom,
-        gas: 300000
+        gas: estimatedGas +  1
     }, (error: any, result: any) => {
         if (error) {
           console.error(error);

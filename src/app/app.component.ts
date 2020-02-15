@@ -93,10 +93,10 @@ export class AppComponent {
     await this.diplomasBlockchainService.approbarClaimByAlumno(this.selectedAccount, executionId);
   }
 
-  async verificarClaimAlumnoByEmpresa( ) {
+  async verificarClaimIdentidadByEmpresa( ) {
     const claimType = this.claimType.nativeElement.value;
-    // verificar una claim de un alumno
-    await this.diplomasBlockchainService.verificarClaimAlumno(this.selectedAccount, addressAlumno, claimType);
+    // verificar una claim de una identidad
+    await this.diplomasBlockchainService.verificarClaimIdentidadByEmpresa(this.selectedAccount, this.selectedAccount, claimType);
   }
 
   async deployIdentidadesDigitales() {
