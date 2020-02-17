@@ -13,7 +13,7 @@ import { Subscription } from 'rxjs';
 export class AppComponent implements OnDestroy {
   consola$: Subscription;
   title = 'UNIR :: Identidad Digital - Diplomas';
-  accounts = [addressAlumno, addressUniversidad, addressEmpresa];
+  accounts = [addressUniversidad, addressAlumno, addressEmpresa];
   selectedAccount = this.accounts[0];
   consola = '';
   disableOpcionesAlumno = false;
