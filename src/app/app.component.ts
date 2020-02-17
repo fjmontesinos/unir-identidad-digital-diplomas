@@ -20,8 +20,8 @@ export class AppComponent implements OnDestroy {
   disableOpcionesAlumno = false;
   disableOpcionesUniversidad = false;
 
-  @ViewChild('keyPurposeAlumno', {static: true}) keyPurposeAlumnoInput: ElementRef;
-  @ViewChild('keyPurposeUniversidad', {static: true}) keyPurposeUniversidadInput: ElementRef;
+  @ViewChild('keyPurpose', {static: true}) keyPurposeAlumnoInput: ElementRef;
+  @ViewChild('accountGetKey', {static: true}) accountGetKey: ElementRef;
   @ViewChild('keyPurpose', {static: true}) keyPurpose: ElementRef;
   @ViewChild('keyType', {static: true}) keyType: ElementRef;
   @ViewChild('claim', {static: true}) claim: ElementRef;
@@ -69,14 +69,10 @@ export class AppComponent implements OnDestroy {
     this.consola = '';
   }
 
-  async getKeyAlumnoByPurpose() {
-    const purpose = this.keyPurposeAlumnoInput.nativeElement.value;
-    await this.diplomasBlockchainService.getKeyByPurpose(this.selectedAccount, addressAlumno, purpose);
-  }
-
-  async getKeyUnivsersidadByPurpose() {
-    const purpose = this.keyPurposeUniversidadInput.nativeElement.value;
-    await this.diplomasBlockchainService.getKeyByPurpose(this.selectedAccount, addressUniversidad, purpose);
+  async getKeyByPurpose() {
+    const purpose = this.keyPurpose.nativeElement.value;
+    const account = this.accountGetKey.nativeElement.value;
+    await this.diplomasBlockchainService.getKeyByPurpose(this.selectedAccount, account, purpose);
   }
 
   async addKeyUniversidad() {

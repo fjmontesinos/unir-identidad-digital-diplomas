@@ -368,21 +368,20 @@
                 <table cellpadding="5">
                     <tr>
                         <td>
-                            Purpose:
-                            <select class="form-control" #keyPurposeAlumno><option value="1">Management</option><option value="2">Action</option><option value="3">Claim Signer</option><option value="4">Encryption</option></select>
+                            Key Purpose:
+                            <select class="form-control" #keyPurpose>
+                                <option value="1">Management</option>
+                                <option value="2">Action</option>
+                                <option value="3">Claim Signer</option>
+                                <option value="4">Encryption</option>
+                            </select> de:
+                            <select #accountGetKey>
+                                <option *ngFor="let i of accountIdentities">{{i}}</option>
+                            </select>
                         </td>
                         <td>
-                            <input class="btn btn-success" type="button" name="getKeyByPurpose_Alumno" (click)="getKeyAlumnoByPurpose()" value="Alumno - Obtener Key by Purpose" />
+                            <input class="btn btn-success" type="button" name="getKeyByPurpose_Alumno" (click)="getKeyByPurpose()" value="Obtener Key by Purpose de Identidad" />
                             <br>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            Purpose:
-                            <select class="form-control" #keyPurposeUniversidad><option value="1">Management</option><option value="2">Action</option><option value="3">Claim Signer</option><option value="4">Encryption</option></select>
-                        </td>
-                        <td>
-                            <input class="btn btn-success" type="button" name="getKeyByPurpose_UNI" value="Universidad - Obtener Key by Purpose" (click)="getKeyUnivsersidadByPurpose()">
                         </td>
                     </tr>
                     <tr [hidden]="disableOpcionesUniversidad">
