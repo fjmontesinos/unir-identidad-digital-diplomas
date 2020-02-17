@@ -176,7 +176,7 @@
     
     #consola {
         overflow: auto;
-        height: 350px;
+        height: 300px;
     }
     
     .terminal::before {
@@ -384,7 +384,7 @@
                             <input class="btn btn-success" type="button" name="getKeyByPurpose_UNI" value="Universidad - Obtener Key by Purpose" (click)="getKeyUnivsersidadByPurpose()">
                         </td>
                     </tr>
-                    <tr>
+                    <tr [hidden]="disableOpcionesUniversidad">
                         <td>
                             Purpose:
                             <select class="form-control" #keyPurpose><option value="1">Management</option><option value="2">Action</option><option value="3" selected>Claim Signer</option><option value="4">Encryption</option></select> Type:
@@ -394,15 +394,15 @@
                             <input class="btn btn-success" type="button" name="addkey_Uni" value="Universidad - A&ntilde;adir Claim Key" (click)="addKeyUniversidad()" [disabled]="disableOpcionesUniversidad">
                         </td>
                     </tr>
-                    <tr>
-                        <td>
+                    <tr [hidden]="disableOpcionesUniversidad">
+                        <td nowrap>
                             Claim: <input class="form-control" type="text" size="70" #claim value="Certificado Experto Universitario en Desarrollo de Aplicaciones Blockchain"><br>
                         </td>
                         <td>
                             <input type="button" name="aniadirclaim" value="Universidad - A&ntilde;adir Claim a Alumno" (click)="addClaimUniversidadToAlumno()" [disabled]="disableOpcionesUniversidad">
                         </td>
                     </tr>
-                    <tr>
+                    <tr [hidden]="disableOpcionesAlumno">
                         <td>
                             Execution Id: <input class="form-control" type="text" size="10" #executionId value=""><br>
                         </td>
