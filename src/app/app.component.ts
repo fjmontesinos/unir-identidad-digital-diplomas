@@ -14,6 +14,7 @@ export class AppComponent implements OnDestroy {
   consola$: Subscription;
   title = 'UNIR :: Identidad Digital - Diplomas';
   accounts = [addressUniversidad, addressAlumno, addressEmpresa];
+  accountIdentities = [addressUniversidad, addressAlumno];
   selectedAccount = this.accounts[0];
   consola = '';
   disableOpcionesAlumno = false;
@@ -24,6 +25,7 @@ export class AppComponent implements OnDestroy {
   @ViewChild('keyPurpose', {static: true}) keyPurpose: ElementRef;
   @ViewChild('keyType', {static: true}) keyType: ElementRef;
   @ViewChild('claim', {static: true}) claim: ElementRef;
+  @ViewChild('accountIdentityCheckClaim', {static: true}) accountIdentityCheckClaim: ElementRef;
   @ViewChild('executionId', {static: true}) executionId: ElementRef;
   @ViewChild('claimType', {static: true}) claimType: ElementRef;
 
@@ -98,8 +100,10 @@ export class AppComponent implements OnDestroy {
 
   async verificarClaimIdentidadByEmpresa( ) {
     const claimType = this.claimType.nativeElement.value;
+    const accountIdentity = this.accountIdentityCheckClaim.nativeElement.value;
     // verificar una claim de una identidad
-    await this.diplomasBlockchainService.verificarClaimIdentidadByEmpresa(this.selectedAccount, this.selectedAccount, claimType);
+    await this.diplomasBlockchainService.verificarClaimIdentidadByEmpresa(this.selectedAccount,
+      accountIdentity, claimType);
   }
 
   async deployIdentidadesDigitales() {

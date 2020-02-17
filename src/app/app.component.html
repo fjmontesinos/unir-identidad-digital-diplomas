@@ -397,7 +397,7 @@
                     </tr>
                     <tr [hidden]="disableOpcionesUniversidad">
                         <td nowrap>
-                            Claim: <input class="form-control" type="text" size="70" #claim value="Certificado Experto Universitario en Desarrollo de Aplicaciones Blockchain"><br>
+                            Claim: <input class="form-control" type="text" size="65" #claim value="Certificado Experto Universitario en Desarrollo de Aplicaciones Blockchain"><br>
                         </td>
                         <td>
                             <input type="button" name="aniadirclaim" value="Universidad - A&ntilde;adir Claim a Alumno" (click)="addClaimUniversidadToAlumno()" [disabled]="disableOpcionesUniversidad">
@@ -412,11 +412,14 @@
                         </td>
                     </tr>
                     <tr>
-                        <td>
-                            Tipo de Claim a verificar: <select class="form-control" #claimType><option value="4">TITULO ACADEMICO</option><option value="5">PERMISO DE CONDUCIR</option></select>
+                        <td nowrap>
+                            Verificar Claim: <select class="form-control" #claimType><option value="4">TITULO ACADEMICO</option><option value="5">PERMISO DE CONDUCIR</option></select> de:
+                            <select class="form-control" #accountIdentityCheckClaim>
+                                <option *ngFor="let i of accountIdentities">{{i}}</option>
+                            </select>
                         </td>
                         <td>
-                            <input type="button" name="verifier_unialumno" value="Verificar Claim de Identidad Seleccionada" (click)="verificarClaimIdentidadByEmpresa()">
+                            <input type="button" name="verifier_unialumno" value="Verificar Claim de Identidad" (click)="verificarClaimIdentidadByEmpresa()">
                         </td>
                     </tr>
                 </table>
