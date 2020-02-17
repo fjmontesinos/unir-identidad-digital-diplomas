@@ -1,8 +1,8 @@
 import { Component, ViewChild, ElementRef, OnDestroy, NgZone } from '@angular/core';
 import { DiplomasBlockchainService } from './services/diplomas-blockchain.service';
 import { Title } from '@angular/platform-browser';
-import { addressAlumno, addressUniversidad, addressEmpresa, identidades } from './config/diplomas-blockchain.config';
-import { IDENTITY_TYPE, IDENTITY_ROLES } from './model/identidad-unir';
+import { addressAlumno, addressUniversidad, addressEmpresa } from './config/diplomas-blockchain.config';
+import { identidades, IDENTITY_TYPE, IDENTITY_ROLES } from './model/identidad-unir';
 import { Subscription } from 'rxjs';
 
 @Component({

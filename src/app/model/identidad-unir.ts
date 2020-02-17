@@ -1,4 +1,7 @@
 import { Injectable } from '@angular/core';
+import { addressAlumno, addressSmartContractAlumno } from '../config/diplomas-blockchain.config';
+import { addressUniversidad, addressSmartContractUniversidad, addressUniversidadClaim } from '../config/diplomas-blockchain.config';
+import { addressEmpresa, addressSmartContractEmpresa } from '../config/diplomas-blockchain.config';
 
 /**
  * Representa a una Identidad Digital en el sistema que puede ser de tipo Verifier o 
@@ -27,3 +30,24 @@ export class IdentidadUNIR {
         this.instancia = _instancia;
     }
 }
+
+export let identidades = new Map<string, IdentidadUNIR>();
+identidades.set(addressAlumno, new IdentidadUNIR(IDENTITY_TYPE.CLAIM_HOLDER,
+    IDENTITY_ROLES.ALUMNO,
+    addressAlumno,
+    addressSmartContractAlumno,
+    null, null));
+
+identidades.set(addressUniversidad, new IdentidadUNIR(IDENTITY_TYPE.CLAIM_HOLDER,
+    IDENTITY_ROLES.UNIVERSIDAD,
+    addressUniversidad,
+    addressSmartContractUniversidad,
+    addressUniversidadClaim,
+    null));
+
+identidades.set(addressEmpresa, new IdentidadUNIR(IDENTITY_TYPE.CLAIM_VERIFIER,
+    IDENTITY_ROLES.EMPRESA,
+    addressEmpresa,
+    addressSmartContractEmpresa,
+    null, null));
+

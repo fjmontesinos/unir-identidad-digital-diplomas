@@ -2,9 +2,9 @@ import { Injectable } from '@angular/core';
 import Web3 from 'web3';
 import { claimHolderABI, claimHolderBytecode } from '../contracts/claimHolder';
 import { claimVerifierABI, claimVerifierBytecode } from '../contracts/claimVerifier';
-import { identidades, addressAlumno, addressUniversidad, addressEmpresa } from '../config/diplomas-blockchain.config';
+import { addressAlumno, addressUniversidad, addressEmpresa } from '../config/diplomas-blockchain.config';
 import { KEY_TYPES, RCP_URL_WS, CLAIM_TYPES } from '../config/diplomas-blockchain.config';
-import { IDENTITY_TYPE } from '../model/identidad-unir';
+import { identidades, IDENTITY_TYPE } from '../model/identidad-unir';
 import { Subject, Observable } from 'rxjs';
 
 declare let window: any;
