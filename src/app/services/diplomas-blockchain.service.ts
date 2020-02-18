@@ -140,33 +140,28 @@ export class DiplomasBlockchainService {
     }
   }
 
-  async getKeyByPurpose( addressFrom: string, address: string, purpose: number ): Promise<any> {
+  async getKeyByPurpose( addressFrom: string, address: string, purpose: number ) {
     // Estimación del gas a utilizar
     const estimatedGas = await identidades.get(address).instancia.methods.getKeysByPurpose(purpose).estimateGas({
         from: addressFrom
       }
     );
 
-    return new Promise((resolve, reject) => {
-      identidades.get(address).instancia.methods.getKeysByPurpose(purpose).call({
-        from: addressFrom,
-        gas: estimatedGas + 1
-      }, (error: any, result: any) => {
-          if (!error) {
-              // console.log(result);
-              if (result.length > 0) {
-                  this.consola$.next('Clave de tipo ' + purpose + ' de ' + address + ':\n'  + result);
-                  resolve(result);
-              } else {
-                  this.consola$.next('La identidad de ' + address + ' no tiene clave de tipo: ' + purpose);
-                  resolve(undefined);
-              }
-          } else {
-              this.consola$.next('Error: ' + error);
-              reject(error);
-          }
-      });
-    }) as Promise<any>;
+    identidades.get(address).instancia.methods.getKeysByPurpose(purpose).call({
+      from: addressFrom,
+      gas: estimatedGas + 1
+    }, (error: any, result: any) => {
+        if (!error) {
+            // console.log(result);
+            if (result.length > 0) {
+                this.consola$.next('Clave de tipo ' + purpose + ' de ' + address + ':\n'  + result);
+            } else {
+                this.consola$.next('La identidad de ' + address + ' no tiene clave de tipo: ' + purpose);
+            }
+        } else {
+            this.consola$.next('Error: ' + error);
+        }
+    });
   }
 
   /**
@@ -245,7 +240,7 @@ export class DiplomasBlockchainService {
         0,
         claimAbi
     ).send({
-        from: addressFrom, // identidades.get(alumnoAccount).accountAddress,
+        from: addressFrom,
         gas: estimatedGas + 1
     }, (error: any, result: any) => {
         if (!error) {
@@ -279,8 +274,8 @@ export class DiplomasBlockchainService {
         gas: estimatedGas + 1
     }, (error: any, result: any) => {
         if (!error) {
-            // console.log(result);
-            this.consola$.next('CLAIM aprobado por el alumno');
+          // console.log(result);
+          this.consola$.next('CLAIM aprobado por el alumno');
         } else {
           this.consola$.next('Error: ' + error);
         }
