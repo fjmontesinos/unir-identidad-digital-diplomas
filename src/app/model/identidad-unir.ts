@@ -3,10 +3,9 @@ import { addressAlumno, addressSmartContractAlumno } from '../config/diplomas-bl
 import { addressUniversidad, addressSmartContractUniversidad, addressUniversidadClaim } from '../config/diplomas-blockchain.config';
 import { addressEmpresa, addressSmartContractEmpresa } from '../config/diplomas-blockchain.config';
 
-/**
- * Representa a una Identidad Digital en el sistema que puede ser de tipo Verifier o 
- */
+// Representa los diferentes roles disponibles en el sistema
 export enum IDENTITY_ROLES {ALUMNO = 1, UNIVERSIDAD, EMPRESA}
+// Representa a una Identidad Digital en el sistema que puede ser de tipo Claim o Verifier
 export enum IDENTITY_TYPE {CLAIM_HOLDER = 1, CLAIM_VERIFIER}
 
 @Injectable({
@@ -31,6 +30,8 @@ export class IdentidadUNIR {
     }
 }
 
+// representa las identidades del sistema, este mapa simularia la información
+// almacenada por la aplicación en relación a los usuarios... 
 export let identidades = new Map<string, IdentidadUNIR>();
 identidades.set(addressAlumno, new IdentidadUNIR(IDENTITY_TYPE.CLAIM_HOLDER,
     IDENTITY_ROLES.ALUMNO,

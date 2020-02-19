@@ -24,4 +24,3 @@ export const addressUniversidadClaim = '0xFc83780Dd8bc6eAE4DEe1f12F7976251D2753D
 // Direcciones asociadas al alumno (wallet y dirección del SmartContract ClaimHolder)
 export const addressEmpresa = '0x7a55fdcb796ba184fda57530af3303b5553efc56';
 export const addressSmartContractEmpresa = '0xb1a0dEB41a2D4891fD5a107DB3214Dcc8764D8f7';
-

@@ -23,26 +23,40 @@ export class DiplomasBlockchainService {
     this.init();
   }
 
+  /**
+   * Retorna un observable que representa la consola en la que se muestra información
+   * en el interfaz de usuario
+   */
   getConsola$(): Observable<string> {
     return this.consola$.asObservable();
   }
 
+  /**
+   * Inicializa el servicio blockchain estableciendo conexión con el Provider e
+   * inicializando las instancias de los smartcontracts
+   */
   async init() {
-    // inicializar web3
     // necesario para que se confirmen las transacciones 
     // desde el segundo bloque en la versión 1.0.0-beta.55 de web3
     const optionsProvider = {
       transactionConfirmationBlocks: 1
     };
 
+    // inicializar web3
     window.web3 = new Web3(new Web3.providers.WebsocketProvider(RCP_URL_WS), null, optionsProvider);
     this.web3 = window.web3;
 
+    // inicializar las instancias de los sc que representan las identidades digitales
     this.initIdentidadesDigitales();
   }
 
+  /**
+   * Inicializa las instancias de los sc que representan a las identidades digitales
+   * Para ello utiliza el abi de cada tipo de instancia ClaimHolder y 
+   * ClaimVerifier disponibles en la aplicación
+   */
   async initIdentidadesDigitales() {
-    // inicializar las instancias de los contratos
+    // inicializar las instancias de los SC en función del tipo de identidad
     for ( let identidad of identidades.values() ) {
       if ( identidad.type === IDENTITY_TYPE.CLAIM_HOLDER ) {
         identidad.instancia = new this.web3.eth.Contract(claimHolderABI, identidad.smartContractAddress);
@@ -50,15 +64,16 @@ export class DiplomasBlockchainService {
         identidad.instancia = new this.web3.eth.Contract(claimVerifierABI, identidad.smartContractAddress);
       }
 
-      // Verificar si la identidad está desplegada en la red blockchain
+      // Verificar si el sc i.e. la identidad está desplegada en la red blockchain
       const code = await this.web3.eth.getCode(identidad.smartContractAddress);
       // Si el code es distinto de 0x -> el contrato está desplegado
-      if ( code !== '0x' ) {
+      if ( code !== '0x' ) {        
         this.totalIdentidadesDesplegadas++;
       }
     }
 
-    // Si se han desplegado las 3 identidades -> añadimos los listeners a las diferentes instancias
+    // Si se han desplegado las 3 identidades ->
+    // se añaden los listeners de eventos a las diferentes instancias
     if ( this.totalIdentidadesDesplegadas === 3 ) {
       // capturar evento para obtener el id de ejecución
       identidades.get(addressAlumno).instancia.events.ExecutionRequested({}, ( error, result ) => {
@@ -91,7 +106,10 @@ export class DiplomasBlockchainService {
   }
 
   /**
-   * Desplegar smart contract de identidad
+   * Desplegar smart contract en la red blockchain. Se utiliza para realizar el despliegue
+   * de los sc tanto el abi como el bytecode de ClaimHolder o ClaimVerifier según sea
+   * el tipo de identidad a desplegar.
+   * 
    * @param address dirección propietario del smart contract
    * @param identidadType tipo de indentidad que se desea desplegar
    */
@@ -104,7 +122,7 @@ export class DiplomasBlockchainService {
 
     } else if ( identidadType === IDENTITY_TYPE.CLAIM_VERIFIER ) {
       c = new this.web3.eth.Contract(claimVerifierABI);
-      // En el caso de ser verifier debemos informar como argumento del constructor
+      // En el caso de ser ClaimVerifier se debe informar como argumento del constructor
       // la dirección del smartcontract del issuer (Universidad)
       payload = {
         data: '0x' + claimVerifierBytecode,
@@ -120,6 +138,9 @@ export class DiplomasBlockchainService {
     };
 
     // Desplegar el contrato en la red
+    // tal como se recoge en la documentación de despliegue el compartamiento es
+    // algo anómalo al recuperar el receipt con la versión web3 utilizada 1.0.0-beta.55
+    // realmente está activandose cuando entra un nuevo bloque en la cadena
     c.deploy(payload)
       .send(parameters)
       .on('error', ( error ) => {
@@ -129,8 +150,9 @@ export class DiplomasBlockchainService {
         console.log(receipt);
       });
   }
+
   /**
-   * Verifica si se han desplegado las 3 identidades necesarias de la práctica
+   * Verifica si se han desplegado las 3 identidades (sc) necesarias de la práctica
    */
   isIdentidadesDigitalesDesplegadas() {
     if ( this.totalIdentidadesDesplegadas === 3 ) {
@@ -140,6 +162,13 @@ export class DiplomasBlockchainService {
     }
   }
 
+  /**
+   * Obtiene una key de un propósito concreto para una dirección concreto realizando la llamada
+   * desde una dirección diferente. Hace uso de instancia.methods.getKeysByPurpose
+   * @param addressFrom Dirección desde la que se realiza la petición
+   * @param address Dirección a la que pertenece el sc sobre la que se realiza la consulta
+   * @param purpose Tipo de próposito de la key que se desea obtener
+   */
   async getKeyByPurpose( addressFrom: string, address: string, purpose: number ) {
     // Estimación del gas a utilizar
     const estimatedGas = await identidades.get(address).instancia.methods.getKeysByPurpose(purpose).estimateGas({
@@ -152,7 +181,6 @@ export class DiplomasBlockchainService {
       gas: estimatedGas + 1
     }, (error: any, result: any) => {
         if (!error) {
-            // console.log(result);
             if (result.length > 0) {
                 this.consola$.next('Clave de tipo ' + purpose + ' de ' + address + ':\n'  + result);
             } else {
@@ -165,12 +193,15 @@ export class DiplomasBlockchainService {
   }
 
   /**
-   * Añadir clave a la universidad para firmar alegaciones (addKey)
-   * @param addressFrom 
-   * @param purpose 
-   * @param type 
+   * Añadir clave a la universidad para firmar alegaciones. Hace uso de instacia.methods.addKey.
+   * @param addressFrom Dirección desde la que se realiza la petición y por lo tanto vinculada al
+   * sc sobre el que se desea añadir la key
+   * @param purpose Tipo de próposito de la key que se desea añadir
+   * @param type Tipo de key que se desea añadir
    */
   async addKeyUniversidad( addressFrom: string, purpose: number, type: number ) {
+    // generación de la key en base a una segunda dirección que la identidad universidad
+    // dispone para firmar alegaciones
     const claimKey = this.web3.utils.keccak256(identidades.get(addressFrom).accountClaim);
 
     // Estimación del gas a utilizar
@@ -201,6 +232,14 @@ export class DiplomasBlockchainService {
     });
   }
 
+  /**
+   * 
+   * @param addressFrom Dirección desde la que se realiza la petición y por lo tanto vinculada al
+   * sc que emite la claim. Hace uso de instancia.methods.addClaim
+   * @param alumnoAccount Dirección asociada a la identidad digital (sc) sobre la que se desea añadir
+   * el claim concreto
+   * @param alegacion Claim que se desea añadir
+   */
   async addClaimUniversidadToAlumno( addressFrom: string, alumnoAccount: string, alegacion: string ) {
     const hexedData = this.web3.utils.asciiToHex(alegacion);
     // console.log('hexedData: ' + hexedData);
@@ -221,7 +260,7 @@ export class DiplomasBlockchainService {
         identidades.get(addressFrom).smartContractAddress,
         signature,
         hexedData,
-        "http://montesinos.org.es"
+        'sin url'
     ).encodeABI();
     // console.log('claimabi: ' + claimAbi);
 
@@ -253,8 +292,13 @@ export class DiplomasBlockchainService {
     });
   }
 
-  // Aprobar la alegación añadida por la universidad al Alumno (approve),
-  // ya que la Universidad la ha expedido pero el alumno debe aprobarla
+  /**
+   * Aprobar la alegación añadida por la universidad al Alumno (approve). Hace uso de
+   * instancia.methods.approve.
+   * @param alumnoAccount Dirección asociada a la identidad digital (sc) sobre la que se desea aprobar
+   * el claim concreto. Debe ser la del alumno.
+   * @param executionId Id de ejecución asociado al claim que se desea aprobar.
+   */
   async approbarClaimByAlumno( addressFrom: string, executionId: number ) {
     // Estimar el gas necesario
     const estimatedGas = await identidades.get(addressFrom).instancia.methods.approve(
@@ -264,7 +308,6 @@ export class DiplomasBlockchainService {
 
     this.consola$.next('Gas estimado para aprobar el CLAIM: ' + estimatedGas);
 
-    // Usar la función instanciaAlumno.methods.approve()
     // ejecutar el añadido de la claim en la identidad del alumno
     identidades.get(addressFrom).instancia.methods.approve(
         executionId,
@@ -284,6 +327,15 @@ export class DiplomasBlockchainService {
 
   // Verificar la alegación por parte de la empresa (checkClaim)
   // de que una identidad tiene el claim solicitado es válido y está aprobado
+  /**
+   * Verificar la alegación añadida por la universidad al Alumno. Hace uso de
+   * instancia.methods.checkClaim
+   * @param addressFrom Dirección desde la que se desea realizar la verificación. Dado que es
+   * una consulta pública no está restringido a ninguna dirección concreta.
+   * @param alumnoAccount Dirección asociado a la identidad digital sobre la que se desea realizar
+   * la verificación
+   * @param tipoClaim Tipo de Claim que se desea verificar.
+   */
   async verificarClaimIdentidadByEmpresa( addressFrom: string, alumnoAccount: string, tipoClaim: number) {
     // Estimar el gas necesario
     const estimatedGas = await identidades.get(addressEmpresa).instancia.methods.checkClaim(
@@ -306,6 +358,5 @@ export class DiplomasBlockchainService {
         }
     });
   }
-
 
 }
